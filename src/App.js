@@ -4,12 +4,17 @@ import './App.css';
 import TextField from '@mui/material/TextField'
 import axios from 'axios';
 import { ArrowForward } from '@mui/icons-material';
-import { Button } from '@mui/material'
+import { Alert, AlertTitle, Button, Snackbar } from '@mui/material'
 
 function App() {
   const [value, setValue] = React.useState('')
   const [responseData, setResponseData] = React.useState(null)
   const [error, setError] = React.useState(null)
+
+
+  const handleClose = () => {
+    setError(null)
+  }
 
   const postData = async () => {
     await axios.post(`${process.env.REACT_APP_API_SERVER}/api/page/new`, {
@@ -23,6 +28,10 @@ function App() {
         setResponseData(response.data)
       })
       .catch(err => {
+
+        if (err.response.status === 400) {
+          setError(err.response.message)
+        }
         console.log("[DEBUG]:", err)
         setError(err);
       });
@@ -47,15 +56,22 @@ function App() {
             Response :
           </h6>
           <p>
-            {responseData}
+            {JSON.stringify(responseData, null, 2)}
           </p>
-          <h6>Error: </h6>
-          <p>
-            { error && JSON.stringify(error, null ,2 )}
-          </p>
+          {error &&
+            <div>
+              <Snackbar
+                anchorOrigin={{ "vertical": "top", "horizontal": "center" } }
+                open={!!error} autoHideDuration={3000} onClose={handleClose}>
+                <Alert variant="filled" severity="error">
+                  {error.response.data.error}
+                </Alert>
+              </Snackbar>
+            </div>
+          }
         </div>
-      </header>
-    </div>
+      </header >
+    </div >
   );
 }
 
